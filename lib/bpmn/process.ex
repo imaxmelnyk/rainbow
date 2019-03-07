@@ -1,10 +1,12 @@
 defmodule Bpmn.Process do
   alias Bpmn.Element
+  use TypedStruct
 
-  @enforce_keys [:id, :elements]
-  defstruct [:id, :name, :elements]
-
-  @type t :: %__MODULE__{id: integer, elements: [Element.t()]}
+  typedstruct do
+    field :id, integer(), enforce: true
+    field :name, String.t()
+    field :elements, [Element.any_element()], enforce: true
+  end
 
   def is_process(%__MODULE__{}), do: true
   def is_process(_), do: false

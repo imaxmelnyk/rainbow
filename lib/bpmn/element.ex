@@ -1,11 +1,11 @@
 defmodule Bpmn.Element do
-  alias Bpmn.{Event, Activity, Gateway, SequenceFlow}
-  alias Bpmn.Event.Start, as: StartEvent
-  alias Bpmn.Event.End, as: EndEvent
+  alias Bpmn.Element.{Event, Activity, Gateway, SequenceFlow}
+  alias Bpmn.Element.Event.Start, as: StartEvent
+  alias Bpmn.Element.Event.End, as: EndEvent
 
-  @type t :: Event.t() | Activity.t() | Gateway.t() | SequenceFlow.t()
-  @type t_source :: StartEvent.t() | Activity.t() | Gateway.t()
-  @type t_target :: EndEvent.t() | Activity.t() | Gateway.t()
+  @type any_element() :: Event.t() | Activity.t() | Gateway.t() | SequenceFlow.t()
+  @type source_element() :: StartEvent.t() | Activity.t() | Gateway.t()
+  @type target_element() :: EndEvent.t() | Activity.t() | Gateway.t()
 
   def is_element(v) do
     Event.is_event(v) ||

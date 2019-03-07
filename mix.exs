@@ -18,6 +18,8 @@ defmodule Rainbow.MixProject do
   end
 
   defp deps do
-    []
+    [
+      {:typed_struct, "~> 0.1.4", runtime: false}
+    ]
   end
 end
