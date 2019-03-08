@@ -6,6 +6,7 @@ defmodule Bpmn.Element.Event.Start do
     field :name, String.t()
   end
 
+  @spec is_start_event(any()) :: boolean()
   def is_start_event(%__MODULE__{}), do: true
   def is_start_event(_), do: false
 end

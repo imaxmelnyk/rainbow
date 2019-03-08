@@ -8,6 +8,7 @@ defmodule Bpmn.Process do
     field :elements, [Element.any_element()], enforce: true
   end
 
+  @spec is_process(any()) :: boolean()
   def is_process(%__MODULE__{}), do: true
   def is_process(_), do: false
 end

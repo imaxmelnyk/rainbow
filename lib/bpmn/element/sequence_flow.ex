@@ -9,6 +9,7 @@ defmodule Bpmn.Element.SequenceFlow do
     field :to, Element.target_element(), enforce: true
   end
 
+  @spec is_sequence_flow(any()) :: boolean()
   def is_sequence_flow(%__MODULE__{}), do: true
   def is_sequence_flow(_), do: false
 end

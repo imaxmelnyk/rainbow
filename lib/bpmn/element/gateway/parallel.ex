@@ -6,6 +6,7 @@ defmodule Bpmn.Element.Gateway.Parallel do
     field :name, String.t()
   end
 
+  @spec is_parallel_gateway(any()) :: boolean()
   def is_parallel_gateway(%__MODULE__{}), do: true
   def is_parallel_gateway(_), do: false
 end

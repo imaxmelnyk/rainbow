@@ -6,6 +6,7 @@ defmodule Bpmn.Element.Event.End do
     field :name, String.t()
   end
 
+  @spec is_end_event(any()) :: boolean()
   def is_end_event(%__MODULE__{}), do: true
   def is_end_event(_), do: false
 end
