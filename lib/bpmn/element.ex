@@ -1,5 +1,7 @@
 defmodule Bpmn.Element do
   alias Bpmn.Element.{Event, Activity, Gateway, SequenceFlow, Variable}
+  alias Bpmn.DecodeError
+  alias Util.Option
 
   @type any_element() :: Event.t() | Activity.t() | Gateway.t() | SequenceFlow.t() | Variable.t()
   @type source_element() :: Event.Start.t() | Activity.t() | Gateway.t()
@@ -28,7 +30,7 @@ defmodule Bpmn.Element do
       Gateway.is_gateway(v)
   end
 
-  @spec decode(map()) :: {:ok, __MODULE__.t()} | :error
+  @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
   def decode(json) do
     case Map.pop(json, :type) do
       {"activity", json} -> Activity.decode(json)
@@ -36,11 +38,11 @@ defmodule Bpmn.Element do
       {"gateway", json} -> Gateway.decode(json)
       {"sequence-flow", json} -> SequenceFlow.decode(json)
       {"variable", json} -> Variable.decode(json)
-      _ -> :error
+      _ -> {:error, DecodeError.create("Unknown element type.")}
     end
   end
 
-  @spec grow([Element.t()], __MODULE__.t()) :: {:ok, __MODULE__.t()} | :error
+  @spec grow([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
   def grow(elements, elem) do
     cond do
       SequenceFlow.is_sequence_flow(elem) -> SequenceFlow.grow(elements, elem)
@@ -48,10 +50,10 @@ defmodule Bpmn.Element do
     end
   end
 
-  @spec find_by_id([Element.t()], integer()) :: {:ok, __MODULE__.t()} | :error
+  @spec find_by_id([Element.t()], integer()) :: Option.t(__MODULE__.t(), any())
   def find_by_id(elements, id) do
     case Enum.find(elements, fn elem -> elem.id == id end) do
-      nil -> :error
+      nil -> {:error, "Element with given id has not been found."}
       elem -> {:ok, elem}
     end
   end

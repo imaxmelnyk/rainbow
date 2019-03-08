@@ -1,5 +1,7 @@
 defmodule Bpmn.Element.SequenceFlow do
   alias Bpmn.Element
+  alias Bpmn.DecodeError
+  alias Util.Option
   use TypedStruct
 
   typedstruct do
@@ -13,16 +15,16 @@ defmodule Bpmn.Element.SequenceFlow do
   def is_sequence_flow(%__MODULE__{}), do: true
   def is_sequence_flow(_), do: false
 
-  @spec decode(map()) :: {:ok, __MODULE__.t()} | :error
+  @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
   def decode(json) do
     try do
       {:ok, struct!(__MODULE__, json)}
     rescue
-      _ -> :error
+      _ -> {:error, DecodeError.create("Error during decoding sequence flow.")}
     end
   end
 
-  @spec grow_from([Element.t()], __MODULE__.t()) :: {:ok, __MODULE__.t()} | :error
+  @spec grow_from([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
   defp grow_from(elements, sequence_flow) do
     cond do
       Element.is_source_element(sequence_flow.from) -> {:ok, sequence_flow}
@@ -31,15 +33,15 @@ defmodule Bpmn.Element.SequenceFlow do
           {:ok, from} ->
             cond do
               Element.is_source_element(from) -> {:ok, struct(sequence_flow, from: from)}
-              true -> :error
+              true -> {:error, DecodeError.create("Error during growing sequence flow.")}
             end
-          _ -> :error
+          error -> error
         end
-      true -> :error
+      true -> {:error, DecodeError.create("Error during growing sequence flow.")}
     end
   end
 
-  @spec grow_to([Element.t()], __MODULE__.t()) :: {:ok, __MODULE__.t()} | :error
+  @spec grow_to([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
   defp grow_to(elements, sequence_flow) do
     cond do
       Element.is_target_element(sequence_flow.to) -> {:ok, sequence_flow}
@@ -48,19 +50,19 @@ defmodule Bpmn.Element.SequenceFlow do
           {:ok, to} ->
             cond do
               Element.is_target_element(to) -> {:ok, struct(sequence_flow, to: to)}
-              true -> :error
+              true -> {:error, DecodeError.create("Error during growing sequence flow.")}
             end
-          _ -> :error
+          error -> error
         end
-      true -> :error
+      true -> {:error, DecodeError.create("Error during growing sequence flow.")}
     end
   end
 
-  @spec grow([Element.t()], __MODULE__.t()) :: {:ok, __MODULE__.t()} | :error
+  @spec grow([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
   def grow(elements, sequence_flow) do
     case grow_from(elements, sequence_flow) do
       {:ok, sequence_flow} -> grow_to(elements, sequence_flow)
-      _ -> :error
+      error -> error
     end
   end
 end

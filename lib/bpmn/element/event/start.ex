@@ -1,4 +1,6 @@
 defmodule Bpmn.Element.Event.Start do
+  alias Bpmn.DecodeError
+  alias Util.Option
   use TypedStruct
 
   typedstruct do
@@ -10,12 +12,12 @@ defmodule Bpmn.Element.Event.Start do
   def is_start_event(%__MODULE__{}), do: true
   def is_start_event(_), do: false
 
-  @spec decode(map()) :: {:ok, __MODULE__.t()} | :error
+  @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
   def decode(json) do
     try do
       {:ok, struct!(__MODULE__, json)}
     rescue
-      _ -> :error
+      _ -> {:error, DecodeError.create("Error during decoding start event.")}
     end
   end
 end

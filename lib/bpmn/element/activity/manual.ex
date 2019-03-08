@@ -1,5 +1,7 @@
 defmodule Bpmn.Element.Activity.Manual do
   alias Bpmn.Element.Activity
+  alias Bpmn.DecodeError
+  alias Util.Option
   use TypedStruct
 
   typedstruct do
@@ -13,12 +15,12 @@ defmodule Bpmn.Element.Activity.Manual do
   def is_manual_activity(%__MODULE__{}), do: true
   def is_manual_activity(_), do: false
 
-  @spec decode(map()) :: {:ok, __MODULE__.t()} | :error
+  @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
   def decode(json) do
     try do
       {:ok, struct!(__MODULE__, json)}
     rescue
-      _ -> :error
+      _ -> {:error, DecodeError.create("Error during decoding manual activity.")}
     end
   end
 end

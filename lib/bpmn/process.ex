@@ -1,6 +1,7 @@
 defmodule Bpmn.Process do
   alias Bpmn.Element
-  alias Bpmn.ProcessDecodeError
+  alias Bpmn.DecodeError
+  alias Util.Option
   use TypedStruct
 
   typedstruct do
@@ -13,64 +14,43 @@ defmodule Bpmn.Process do
   def is_process(%__MODULE__{}), do: true
   def is_process(_), do: false
 
-  @spec decode(map()) :: {:ok, __MODULE__.t()} | {:error, ProcessDecodeError.t()}
+  @spec decode(map()) :: Option.t(__MODULE__.t(), any())
   def decode(json) do
-    case Map.fetch(json, :elements) do
-      {:ok, elements} when is_list(elements) ->
-        elements =
-          Enum.reduce_while(elements, {:ok, []}, fn elem, {:ok, acc} ->
-            case Element.decode(elem) do
-              {:ok, elem} -> {:cont, {:ok, [elem | acc]}}
-              _ -> {:halt, :error}
-            end
-          end)
-
-        case elements do
-          {:ok, elements} ->
-            json = %{json | elements: elements}
-
-            process =
-              try do
-                {:ok, struct!(__MODULE__, json)}
-              rescue
-                _ -> :error
-              end
-
-            case process do
-              {:ok, process} ->
-                # do we really need to grow ?
-                case grow(process) do
-                  {:ok, process} -> {:ok, process}
-                  _ -> {:error, ProcessDecodeError.create("Error during growing process.")}
-                end
-              _ -> {:error, ProcessDecodeError.create("Error during decoding process.")}
-            end
-          _ -> {:error, ProcessDecodeError.create("Error during decoding elements.")}
-        end
-      _ -> {:error, ProcessDecodeError.create("Elements has not been found.")}
-    end
-  end
-
-  @spec grow(__MODULE__.t()) :: {:ok, __MODULE__.t()} | :error
-  def grow(process) do
-    elements = process.elements
-
-    elements =
-      Enum.reduce_while(elements, {:ok, []}, fn elem, {:ok, acc} ->
-        case Element.grow(elements, elem) do
+    json
+    |> Map.fetch(:elements)
+    |> Option.flat_map(fn elements ->
+      elements
+      |> Enum.reduce_while({:ok, []}, fn elem, {:ok, acc} ->
+        case Element.decode(elem) do
           {:ok, elem} -> {:cont, {:ok, [elem | acc]}}
-          _ -> {:halt, :error}
+          error -> {:halt, error}
         end
       end)
+    end)
+    |> Option.flat_map(fn elements ->
+      try do
+        {:ok, struct!(__MODULE__, %{json | elements: elements})}
+      rescue
+        _ -> {:error, DecodeError.create("Error during decoding process.")}
+      end
+    end)
+    |> Option.flat_map(&(grow(&1)))
+  end
 
-    case elements do
-      {:ok, elements} -> {:ok, struct!(process, elements: elements)}
-      _ -> :error
-    end
+  @spec grow(__MODULE__.t()) :: Option.t(__MODULE__.t(), any())
+  def grow(process) do
+    process.elements
+    |> Enum.reduce_while({:ok, []}, fn elem, {:ok, acc} ->
+      case Element.grow(process.elements, elem) do
+        {:ok, elem} -> {:cont, {:ok, [elem | acc]}}
+        error -> {:halt, error}
+      end
+    end)
+    |> Option.flat_map(&(struct!(process, [elements: &1])))
   end
 end
 
-defmodule Bpmn.ProcessDecodeError do
+defmodule Bpmn.DecodeError do
   use TypedStruct
 
   typedstruct do
@@ -80,9 +60,9 @@ defmodule Bpmn.ProcessDecodeError do
 
   @spec create(String.t()) :: __MODULE__.t()
   def create(msg) do
-    struct!(ProcessDecodeError, message: msg)
+    struct!(__MODULE__, message: msg)
   end
 
   @spec create() :: __MODULE__.t()
-  def create(), do: struct!(ProcessDecodeError)
+  def create(), do: struct!(__MODULE__)
 end
