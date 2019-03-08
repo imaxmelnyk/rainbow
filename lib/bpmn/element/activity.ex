@@ -24,4 +24,12 @@ defmodule Bpmn.Element.Activity do
   """
   @spec execute([Variable.t()]) :: [Variable.t()]
   def execute(vars), do: vars
+
+  @spec decode(map()) :: {:ok, __MODULE__.t()} | :error
+  def decode(json) do
+    case Map.pop(json, :subtype) do
+      {"manual", json} -> ManualActivity.decode(json)
+      _ -> :error
+    end
+  end
 end

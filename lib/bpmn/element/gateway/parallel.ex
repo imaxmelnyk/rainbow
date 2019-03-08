@@ -9,4 +9,13 @@ defmodule Bpmn.Element.Gateway.Parallel do
   @spec is_parallel_gateway(any()) :: boolean()
   def is_parallel_gateway(%__MODULE__{}), do: true
   def is_parallel_gateway(_), do: false
+
+  @spec decode(map()) :: {:ok, __MODULE__.t()} | :error
+  def decode(json) do
+    try do
+      {:ok, struct!(__MODULE__, json)}
+    rescue
+      _ -> :error
+    end
+  end
 end
