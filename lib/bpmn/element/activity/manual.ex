@@ -1,15 +1,9 @@
 defmodule Bpmn.Element.Activity.Manual do
-  alias Bpmn.Element.Activity
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
 
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
-    field :is_allowed, Activity.t_is_allowed(), default: &Activity.is_allowed/1
-    field :execute, Activity.t_execute(), default: &Activity.execute/1
-  end
+  use Bpmn.Element.Activity
+  fields()
 
   @spec is_manual_activity(any()) :: boolean()
   def is_manual_activity(%__MODULE__{}), do: true

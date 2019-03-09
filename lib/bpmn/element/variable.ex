@@ -1,11 +1,9 @@
 defmodule Bpmn.Element.Variable do
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
 
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
+  use Bpmn.Element
+  fields do
     field :value, String.t() | float() | boolean()
   end
 

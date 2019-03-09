@@ -1,12 +1,9 @@
 defmodule Bpmn.Element.Event.End do
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
 
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
-  end
+  use Bpmn.Element.Event
+  fields()
 
   @spec is_end_event(any()) :: boolean()
   def is_end_event(%__MODULE__{}), do: true

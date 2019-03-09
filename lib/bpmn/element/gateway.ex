@@ -1,4 +1,25 @@
 defmodule Bpmn.Element.Gateway do
+  defmacro __using__(_) do
+    quote do
+      import unquote(__MODULE__), only: [fields: 0, fields: 1]
+    end
+  end
+
+  defmacro fields(do: new_fields) do
+    use Bpmn.Element
+    quote do
+      fields do
+        unquote(new_fields)
+      end
+    end
+  end
+
+  defmacro fields() do
+    quote do
+      fields do: nil
+    end
+  end
+
   alias Bpmn.Element.Gateway.Exclusive, as: ExclusiveGateway
   alias Bpmn.Element.Gateway.Parallel, as: ParallelGateway
   alias Bpmn.DecodeError

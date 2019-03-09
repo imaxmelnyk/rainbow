@@ -1,4 +1,29 @@
 defmodule Bpmn.Element do
+  defmacro __using__(_) do
+    quote do
+      import unquote(__MODULE__), only: [fields: 0, fields: 1]
+    end
+  end
+
+  defmacro fields(do: new_fields) do
+    use TypedStruct
+    quote do
+      typedstruct do
+        # Base element fields
+        field :id, integer(), enforce: true
+        field :name, String.t()
+
+        unquote(new_fields)
+      end
+    end
+  end
+
+  defmacro fields() do
+    quote do
+      fields do: nil
+    end
+  end
+
   alias Bpmn.Element.{Event, Activity, Gateway, SequenceFlow, Variable}
   alias Bpmn.DecodeError
   alias Util.Option

@@ -2,8 +2,8 @@ defmodule Bpmn.Process do
   alias Bpmn.Element
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
 
+  use TypedStruct
   typedstruct do
     field :id, integer(), enforce: true
     field :name, String.t()
@@ -18,6 +18,12 @@ defmodule Bpmn.Process do
   def decode(json) do
     json
     |> Map.fetch(:elements)
+    |> (fn elements ->
+      case elements do
+        :error -> {:error, DecodeError.create("Error during decoding process.")}
+        ok -> ok
+      end
+    end).()
     |> Option.flat_map(fn elements ->
       elements
       |> Enum.reduce_while({:ok, []}, fn elem, {:ok, acc} ->

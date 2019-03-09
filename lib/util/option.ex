@@ -9,9 +9,12 @@ defmodule Util.Option do
   def map({:ok, val}, succ, _), do: {:ok, succ.(val)}
   def map({:error, err}, _, fail), do: {:error, fail.(err)}
 
+  # i dont even know...
   @spec flat(t(any, any)) :: any
   def flat({:ok, val}), do: val
-  def flat({:error, err}), do: err   # tricky one. avoid or just be careful?
+  def flat({:error, {:ok, val}}), do: {:ok, val}
+  def flat({:error, {:error, err}}), do: {:error, err}
+  def flat(error), do: error
 
   @spec flat_map(t(any, any), (any -> t(any, any))) :: t(any, any)
   def flat_map(opt, succ), do: map(opt, succ) |> flat()

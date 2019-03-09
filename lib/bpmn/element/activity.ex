@@ -1,4 +1,27 @@
 defmodule Bpmn.Element.Activity do
+  defmacro __using__(_) do
+    quote do
+      import unquote(__MODULE__), only: [fields: 0, fields: 1]
+    end
+  end
+
+  defmacro fields(do: new_fields) do
+    use Bpmn.Element
+    quote do
+      fields do
+        field :is_allowed, unquote(__MODULE__).t_is_allowed(), default: &unquote(__MODULE__).is_allowed/1
+        field :execute, unquote(__MODULE__).t_execute(), default: &unquote(__MODULE__).execute/1
+        unquote(new_fields)
+      end
+    end
+  end
+
+  defmacro fields() do
+    quote do
+      fields do: nil
+    end
+  end
+
   alias Bpmn.Element.Activity.Manual, as: ManualActivity
   alias Bpmn.Element.Variable
   alias Bpmn.DecodeError

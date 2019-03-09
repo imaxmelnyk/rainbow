@@ -1,12 +1,9 @@
 defmodule Bpmn.Element.Event.Start do
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
-
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
-  end
+ 
+  use Bpmn.Element.Event
+  fields()
 
   @spec is_start_event(any()) :: boolean()
   def is_start_event(%__MODULE__{}), do: true

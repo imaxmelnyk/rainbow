@@ -2,11 +2,9 @@ defmodule Bpmn.Element.SequenceFlow do
   alias Bpmn.Element
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
 
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
+  use Bpmn.Element
+  fields do
     field :from, Element.source_element() | integer(), enforce: true
     field :to, Element.target_element() | integer(), enforce: true
   end

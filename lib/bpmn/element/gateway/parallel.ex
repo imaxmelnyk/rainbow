@@ -1,12 +1,9 @@
 defmodule Bpmn.Element.Gateway.Parallel do
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
-
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
-  end
+  
+  use Bpmn.Element.Gateway
+  fields()
 
   @spec is_parallel_gateway(any()) :: boolean()
   def is_parallel_gateway(%__MODULE__{}), do: true

@@ -1,12 +1,9 @@
 defmodule Bpmn.Element.Gateway.Exclusive do
   alias Bpmn.DecodeError
   alias Util.Option
-  use TypedStruct
 
-  typedstruct do
-    field :id, integer(), enforce: true
-    field :name, String.t()
-  end
+  use Bpmn.Element.Gateway
+  fields()
 
   @spec is_exclusive_gateway(any()) :: boolean()
   def is_exclusive_gateway(%__MODULE__{}), do: true
