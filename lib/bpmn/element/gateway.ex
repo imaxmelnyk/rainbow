@@ -22,7 +22,7 @@ defmodule Bpmn.Element.Gateway do
 
   alias Bpmn.Element.Gateway.Exclusive, as: ExclusiveGateway
   alias Bpmn.Element.Gateway.Parallel, as: ParallelGateway
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   @type t() :: ExclusiveGateway.t() | ParallelGateway.t()

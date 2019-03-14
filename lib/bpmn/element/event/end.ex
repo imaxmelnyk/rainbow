@@ -1,5 +1,5 @@
 defmodule Bpmn.Element.Event.End do
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   use Bpmn.Element.Event

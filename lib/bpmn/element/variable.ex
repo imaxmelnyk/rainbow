@@ -1,10 +1,10 @@
 defmodule Bpmn.Element.Variable do
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   use Bpmn.Element
   fields do
-    field :value, String.t() | float() | boolean()
+    field :value, number() | boolean()
   end
 
   @spec is_variable(any()) :: boolean()
@@ -18,5 +18,12 @@ defmodule Bpmn.Element.Variable do
     rescue
       _ -> {:error, DecodeError.create("Error during decoding variable.")}
     end
+  end
+
+  @spec list_to_map([__MODULE__.t()]) :: map()
+  def list_to_map(variables) do
+    Enum.reduce(variables, %{}, fn variable, map ->
+      Map.put(map, variable.name, variable.value)
+    end)
   end
 end

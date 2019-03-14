@@ -1,5 +1,5 @@
 defmodule Bpmn.Element.Gateway.Exclusive do
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   use Bpmn.Element.Gateway

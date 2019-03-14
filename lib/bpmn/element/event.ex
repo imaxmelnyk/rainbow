@@ -22,7 +22,7 @@ defmodule Bpmn.Element.Event do
 
   alias Bpmn.Element.Event.Start, as: StartEvent
   alias Bpmn.Element.Event.End, as: EndEvent
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   @type t() :: StartEvent.t() | EndEvent.t()

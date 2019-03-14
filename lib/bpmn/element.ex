@@ -25,7 +25,7 @@ defmodule Bpmn.Element do
   end
 
   alias Bpmn.Element.{Event, Activity, Gateway, SequenceFlow, Variable}
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   @type any_element() :: Event.t() | Activity.t() | Gateway.t() | SequenceFlow.t() | Variable.t()

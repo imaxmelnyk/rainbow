@@ -1,5 +1,5 @@
 defmodule Bpmn.Element.Activity.Manual do
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   use Bpmn.Element.Activity
@@ -9,7 +9,7 @@ defmodule Bpmn.Element.Activity.Manual do
   def is_manual_activity(%__MODULE__{}), do: true
   def is_manual_activity(_), do: false
 
-  @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
+  @spec decode(map()) :: Option.t(__MODULE__.t(), any())
   def decode(json) do
     try do
       {:ok, struct!(__MODULE__, json)}

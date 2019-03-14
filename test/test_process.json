@@ -9,7 +9,8 @@
     "id": 2,
     "name": "A",
     "type": "activity",
-    "subtype": "manual"
+    "subtype": "manual",
+    "is_allowed": "V >= 1000"
   }, {
     "id": 3,
     "type": "event",
@@ -24,5 +25,10 @@
     "type": "sequence-flow",
     "from": 2,
     "to": 3
+  }, {
+    "id": 6,
+    "name": "V",
+    "type": "variable",
+    "value": 0
   }]
 }

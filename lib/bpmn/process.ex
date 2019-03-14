@@ -1,6 +1,6 @@
 defmodule Bpmn.Process do
   alias Bpmn.Element
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   use TypedStruct
@@ -52,23 +52,6 @@ defmodule Bpmn.Process do
         error -> {:halt, error}
       end
     end)
-    |> Option.flat_map(&(struct!(process, [elements: &1])))
+    |> Option.map(&(struct!(process, [elements: &1])))
   end
-end
-
-defmodule Bpmn.DecodeError do
-  use TypedStruct
-
-  typedstruct do
-    field :message, String.t(),
-      default: "Cannot decode bpmn process from the given json. Please, read the specification."
-  end
-
-  @spec create(String.t()) :: __MODULE__.t()
-  def create(msg) do
-    struct!(__MODULE__, message: msg)
-  end
-
-  @spec create() :: __MODULE__.t()
-  def create(), do: struct!(__MODULE__)
 end

@@ -24,8 +24,9 @@ defmodule Bpmn.Element.Activity do
 
   alias Bpmn.Element.Activity.Manual, as: ManualActivity
   alias Bpmn.Element.Variable
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
+  alias Util.BooleanExpression
 
   @type t() :: ManualActivity.t()
   @type t_is_allowed() :: ([Variable.t()] -> boolean())
@@ -50,11 +51,36 @@ defmodule Bpmn.Element.Activity do
   @spec execute([Variable.t()]) :: [Variable.t()]
   def execute(vars), do: vars
 
-  @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
+  @spec decode(map()) :: Option.t(__MODULE__.t(), any())
   def decode(json) do
-    case Map.pop(json, :subtype) do
-      {"manual", json} -> ManualActivity.decode(json)
-      _ -> {:error, DecodeError.create("Unknown activity type.")}
-    end
+    is_allowed_option =
+      case Map.get(json, :is_allowed) do
+        nil -> {:ok, &__MODULE__.is_allowed/1}
+        expr when is_binary(expr) -> decode_boolean_expression(expr)
+        _ -> {:error, DecodeError.create()}
+      end
+
+    is_allowed_option
+    |> Option.map(&(Map.put(json, :is_allowed, &1)))
+    |> Option.flat_map(fn json ->
+      case Map.pop(json, :subtype) do
+        {"manual", json} -> ManualActivity.decode(json)
+        _ -> {:error, DecodeError.create("Unknown activity type.")}
+      end
+    end)
+  end
+
+  @spec decode_boolean_expression(String.t()) :: ([Variable.t()] -> boolean())
+  defp decode_boolean_expression(expr) do
+    expr
+      |> BooleanExpression.parse()
+      |> Option.map(fn expr ->
+        fn variables ->
+          case BooleanExpression.exec(expr, Variable.list_to_map(variables)) do
+            {:ok, val} -> val
+            {:error, _err} -> false
+          end
+        end
+      end)
   end
 end

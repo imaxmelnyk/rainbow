@@ -1,6 +1,6 @@
 defmodule Bpmn.Element.SequenceFlow do
   alias Bpmn.Element
-  alias Bpmn.DecodeError
+  alias Bpmn.Process.DecodeError
   alias Util.Option
 
   use Bpmn.Element
