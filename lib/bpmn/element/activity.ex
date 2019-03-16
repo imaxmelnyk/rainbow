@@ -70,7 +70,7 @@ defmodule Bpmn.Element.Activity do
     end)
   end
 
-  @spec decode_boolean_expression(String.t()) :: ([Variable.t()] -> boolean())
+  @spec decode_boolean_expression(String.t()) :: Option.t(([Variable.t()] -> boolean()), any)
   defp decode_boolean_expression(expr) do
     expr
       |> BooleanExpression.parse()
