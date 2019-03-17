@@ -40,18 +40,5 @@ defmodule Bpmn.Process do
         _ -> {:error, DecodeError.create("Error during decoding process.")}
       end
     end)
-    |> Option.flat_map(&(grow(&1)))
-  end
-
-  @spec grow(__MODULE__.t()) :: Option.t(__MODULE__.t(), any())
-  def grow(process) do
-    process.elements
-    |> Enum.reduce_while({:ok, []}, fn elem, {:ok, acc} ->
-      case Element.grow(process.elements, elem) do
-        {:ok, elem} -> {:cont, {:ok, [elem | acc]}}
-        error -> {:halt, error}
-      end
-    end)
-    |> Option.map(&(struct!(process, [elements: &1])))
   end
 end

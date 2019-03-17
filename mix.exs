@@ -20,7 +20,7 @@ defmodule Rainbow.MixProject do
   defp deps do
     [
       {:typed_struct, "~> 0.1.4", runtime: false},
-      {:jason, "~> 1.1"}
+      {:sweet_xml, "~> 0.6.6"}
     ]
   end
 end

@@ -37,8 +37,7 @@ defmodule Bpmn.Element do
     Event.is_event(v) ||
       Activity.is_activity(v) ||
       Gateway.is_gateway(v) ||
-      SequenceFlow.is_sequence_flow(v) ||
-      Variable.is_variable(v)
+      SequenceFlow.is_sequence_flow(v)
   end
 
   @spec is_source_element(any()) :: boolean()
@@ -62,16 +61,7 @@ defmodule Bpmn.Element do
       {"event", json} -> Event.decode(json)
       {"gateway", json} -> Gateway.decode(json)
       {"sequence-flow", json} -> SequenceFlow.decode(json)
-      {"variable", json} -> Variable.decode(json)
       _ -> {:error, DecodeError.create("Unknown element type.")}
-    end
-  end
-
-  @spec grow([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
-  def grow(elements, elem) do
-    cond do
-      SequenceFlow.is_sequence_flow(elem) -> SequenceFlow.grow(elements, elem)
-      true -> {:ok, elem}
     end
   end
 

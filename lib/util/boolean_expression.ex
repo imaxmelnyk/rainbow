@@ -44,6 +44,22 @@ defmodule Util.BooleanExpression do
           |> exec(variables)
           |> Option.map(fn right -> left || right end)
         end)
+      {comparison_operator, left, right} when comparison_operator in [:eq, :ne] ->
+        left_option = get_variable(left, variables, &(is_number(&1) || is_binary(&1)))
+        right_option = get_variable(right, variables, &(is_number(&1) || is_binary(&1)))
+
+        Option.flat_map(left_option, fn left ->
+          Option.flat_map(right_option, fn right ->
+            case {left, right} do
+              {left, right} when (is_binary(left) and is_binary(right)) or (is_number(left) and is_number(right)) ->
+                case comparison_operator do
+                  :eq -> {:ok, left == right}
+                  :ne -> {:ok, left != right}
+                end
+              _ -> {:error, %ExecError{message: "Invalid boolean expression."}}
+            end
+          end)
+        end)
       {comparison_operator, left, right} ->
         left_option = get_variable(left, variables, &(is_number(&1)))
         right_option = get_variable(right, variables, &(is_number(&1)))
@@ -51,8 +67,6 @@ defmodule Util.BooleanExpression do
         Option.flat_map(left_option, fn left ->
           Option.flat_map(right_option, fn right ->
             case comparison_operator do
-              :eq -> {:ok, left == right}
-              :ne -> {:ok, left != right}
               :lt -> {:ok, left < right}
               :le -> {:ok, left <= right}
               :gt -> {:ok, left > right}
@@ -165,30 +179,26 @@ defmodule Util.BooleanExpression do
       _ ->
         case String.split(expr, regex, include_captures: true) do
           [left, operator, right] ->
-            left_option =
+            left =
               case Float.parse(left) do
-                {left, ""} -> {:ok, left}
-                _ -> is_variable(left)
+                {left, ""} -> left
+                _ -> left
               end
-            right_option =
+            right =
               case Float.parse(right) do
-                {right, ""} -> {:ok, right}
-                _ -> is_variable(right)
+                {right, ""} -> right
+                _ -> right
               end
 
-            Option.flat_map(left_option, fn left ->
-              Option.flat_map(right_option, fn right ->
-                case operator do
-                  " == " -> {:ok, {:eq , left, right}}
-                  " != " -> {:ok, {:ne , left, right}}
-                  " < " -> {:ok, {:lt , left, right}}
-                  " <= " -> {:ok, {:le , left, right}}
-                  " > " -> {:ok, {:gt , left, right}}
-                  " >= " -> {:ok, {:ge , left, right}}
-                  _ -> {:error, %ParseError{message: "Error during parsing comparison operators."}}
-                end
-              end)
-            end)
+            case operator do
+              " == " -> {:ok, {:eq , left, right}}
+              " != " -> {:ok, {:ne , left, right}}
+              " < " -> {:ok, {:lt , left, right}}
+              " <= " -> {:ok, {:le , left, right}}
+              " > " -> {:ok, {:gt , left, right}}
+              " >= " -> {:ok, {:ge , left, right}}
+              _ -> {:error, %ParseError{message: "Error during parsing comparison operators."}}
+            end
           _ -> is_variable(expr)
         end
     end
@@ -238,15 +248,13 @@ defmodule Util.BooleanExpression do
   defp get_variable(variable, variables, check_type) do
     cond do
       is_binary(variable) ->
-        case Map.get(variables, variable) do
-          nil -> {:error, %ExecError{message: "There is no variable with name: '#{variable}'."}}
+        case Map.get(variables, variable, variable) do
           value ->
             cond do
               check_type.(value) -> {:ok, value}
               true -> {:error, %ExecError{message: "The variable with name: '#{variable}', has wrong type."}}
             end
         end
-      check_type.(variable) -> {:ok, variable}
       true -> {:error, %ExecError{message: "Invalid boolean expression."}}
     end
   end

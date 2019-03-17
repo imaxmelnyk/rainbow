@@ -1,7 +1,7 @@
 defmodule Bpmn.Element.Event.Start do
   alias Bpmn.Process.DecodeError
   alias Util.Option
- 
+
   use Bpmn.Element.Event
   fields()
 

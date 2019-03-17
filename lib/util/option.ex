@@ -22,7 +22,7 @@ defmodule Util.Option do
   @spec flat_map(t(any, any), (any -> t(any, any)), (any -> t(any, any))) :: t(any, any)
   def flat_map(opt, succ, fail), do: map(opt, succ, fail) |> flatten()
 
-  @spec from_map(map) :: Option.t(map, any)
+  @spec from_map(map | list) :: Option.t(map, any)
   def from_map(map) do
     map
     |> Enum.reduce_while({:ok, %{}}, fn {key, value}, {:ok, map} ->

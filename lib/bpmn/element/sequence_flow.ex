@@ -1,13 +1,23 @@
 defmodule Bpmn.Element.SequenceFlow do
-  alias Bpmn.Element
   alias Bpmn.Process.DecodeError
   alias Util.Option
+  alias Util.BooleanExpression
 
   use Bpmn.Element
   fields do
-    field :from, Element.source_element() | integer(), enforce: true
-    field :to, Element.target_element() | integer(), enforce: true
+    field :is_allowed, __MODULE__.t_is_allowed(), default: &__MODULE__.is_allowed/1
+    field :source, String.t(), enforce: true
+    field :tagret, String.t(), enforce: true
   end
+
+  @type t_is_allowed() :: ([Variable.t()] -> boolean())
+
+  @doc """
+  Default value.
+  Sequence flow is always allowed.
+  """
+  @spec is_allowed([Variable.t()]) :: boolean()
+  def is_allowed(_), do: true
 
   @spec is_sequence_flow(any()) :: boolean()
   def is_sequence_flow(%__MODULE__{}), do: true
@@ -15,52 +25,27 @@ defmodule Bpmn.Element.SequenceFlow do
 
   @spec decode(map()) :: Option.t(__MODULE__.t(), DecodeError.t())
   def decode(json) do
-    try do
-      {:ok, struct!(__MODULE__, json)}
-    rescue
-      _ -> {:error, DecodeError.create("Error during decoding sequence flow.")}
-    end
-  end
-
-  @spec grow_from([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
-  defp grow_from(elements, sequence_flow) do
-    cond do
-      Element.is_source_element(sequence_flow.from) -> {:ok, sequence_flow}
-      is_integer(sequence_flow.from) ->
-        case Element.find_by_id(elements, sequence_flow.from) do
-          {:ok, from} ->
-            cond do
-              Element.is_source_element(from) -> {:ok, struct(sequence_flow, from: from)}
-              true -> {:error, DecodeError.create("Error during growing sequence flow.")}
+    case Map.get(json, :is_allowed) do
+      nil -> {:ok, &__MODULE__.is_allowed/1}
+      expr when is_binary(expr) ->
+        expr
+        |> BooleanExpression.parse()
+        |> Option.map(fn expr ->
+          fn variables ->
+            case BooleanExpression.exec(expr, variables) do
+              {:ok, result} -> result
+              {:error, _err} -> false
             end
-          error -> error
-        end
-      true -> {:error, DecodeError.create("Error during growing sequence flow.")}
+          end
+        end)
     end
-  end
-
-  @spec grow_to([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
-  defp grow_to(elements, sequence_flow) do
-    cond do
-      Element.is_target_element(sequence_flow.to) -> {:ok, sequence_flow}
-      is_integer(sequence_flow.to) ->
-        case Element.find_by_id(elements, sequence_flow.to) do
-          {:ok, to} ->
-            cond do
-              Element.is_target_element(to) -> {:ok, struct(sequence_flow, to: to)}
-              true -> {:error, DecodeError.create("Error during growing sequence flow.")}
-            end
-          error -> error
-        end
-      true -> {:error, DecodeError.create("Error during growing sequence flow.")}
-    end
-  end
-
-  @spec grow([Element.t()], __MODULE__.t()) :: Option.t(__MODULE__.t(), any())
-  def grow(elements, sequence_flow) do
-    case grow_from(elements, sequence_flow) do
-      {:ok, sequence_flow} -> grow_to(elements, sequence_flow)
-      error -> error
-    end
+    |> Option.map(&(Map.put(json, :is_allowed, &1)))
+    |> Option.flat_map(fn json ->
+      try do
+        {:ok, struct!(__MODULE__, json)}
+      rescue
+        _ -> {:error, DecodeError.create("Error during decoding sequence flow.")}
+      end
+    end)
   end
 end
