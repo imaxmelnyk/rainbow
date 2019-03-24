@@ -44,7 +44,7 @@ defmodule Bpmn.Element.SequenceFlow do
       try do
         {:ok, struct!(__MODULE__, json)}
       rescue
-        error -> raise error
+        _ -> {:error, DecodeError.create("Error during decoding sequence flow.")}
       end
     end)
   end
