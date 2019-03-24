@@ -24,11 +24,11 @@ defmodule Bpmn.Element do
     end
   end
 
-  alias Bpmn.Element.{Event, Activity, Gateway, SequenceFlow, Variable}
+  alias Bpmn.Element.{Event, Activity, Gateway, SequenceFlow}
   alias Bpmn.Process.DecodeError
   alias Util.Option
 
-  @type any_element() :: Event.t() | Activity.t() | Gateway.t() | SequenceFlow.t() | Variable.t()
+  @type any_element() :: Event.t() | Activity.t() | Gateway.t() | SequenceFlow.t()
   @type source_element() :: Event.Start.t() | Activity.t() | Gateway.t()
   @type target_element() :: Event.End.t() | Activity.t() | Gateway.t()
 

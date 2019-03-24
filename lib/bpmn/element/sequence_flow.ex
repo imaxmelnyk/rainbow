@@ -7,16 +7,16 @@ defmodule Bpmn.Element.SequenceFlow do
   fields do
     field :is_allowed, __MODULE__.t_is_allowed(), default: &__MODULE__.is_allowed/1
     field :source, String.t(), enforce: true
-    field :tagret, String.t(), enforce: true
+    field :target, String.t(), enforce: true
   end
 
-  @type t_is_allowed() :: ([Variable.t()] -> boolean())
+  @type t_is_allowed() :: (map() -> boolean())
 
   @doc """
   Default value.
   Sequence flow is always allowed.
   """
-  @spec is_allowed([Variable.t()]) :: boolean()
+  @spec is_allowed(map()) :: boolean()
   def is_allowed(_), do: true
 
   @spec is_sequence_flow(any()) :: boolean()
@@ -44,7 +44,7 @@ defmodule Bpmn.Element.SequenceFlow do
       try do
         {:ok, struct!(__MODULE__, json)}
       rescue
-        _ -> {:error, DecodeError.create("Error during decoding sequence flow.")}
+        error -> raise error
       end
     end)
   end
